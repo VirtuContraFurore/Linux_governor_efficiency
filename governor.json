@@ -1,0 +1,12 @@
+	"global" : {
+		"duration" : 5,
+		"calibration" : "CPU0",
+		"default_policy" : "SCHED_OTHER",
+		"pi_enabled" : false,
+		"lock_pages" : false,
+		"logdir" : "./",
+		"log_basename" : "log",
+		"ftrace" : true, /* On newer rt-app version -> "main,task,loop,event",*/
+		"gnuplot" : false
+	}
+}
