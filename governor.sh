@@ -1,16 +1,14 @@
 #!/bin/bash
 
 # Script to test governor efficiency
-# author: Luca Ceragioli
-# date: July 2021
 
 #########################################################################################
 ########### INPUT DATA: #################################################################
 #########################################################################################
-CORES=${1:-4}			#number of cores -> max UTILIZATION will depend on this number
-TASKS=${2:-10}			#tasks for each taskset
-TASKSETS=${3:-4} 		#tasksets for each utilization value
-UTIL_VALS=${4:-10} 	#number of utilization values uniformly taken between 1.0 and 2*CORES - 1.0
+CORES=4			#number of cores -> max UTILIZATION will depend on this number
+TASKS=10		#tasks for each taskset
+TASKSETS=4 		#tasksets for each utilization value
+UTIL_VALS=10 	#number of utilization values uniformly taken between 1.0 and 2*CORES - 1.0
 
 # global vars:
 BASEDIR="./governor-results" #output directory
@@ -109,6 +107,25 @@ startup(){
 		echo "Error: rt-app is not installed. Please add it to PATH!"
 		exit
 	fi
+
+	if [[ ! -f "./freq_logger" ]]
+	then
+		if [[ ! -f "./freq_logger.c" ]]
+		then
+			echo "Error: freq_logger.c or freq_logger executable aren't available."
+			exit
+		else
+			echo "Compiling freq_logger (assuming gcc is installed)"
+			gcc ./freq_logger.c -o ./freq_logger
+			if [[ ! -f "./freq_logger" ]]
+			then
+				echo "Error: Compilation failed (is gcc installed?)"
+				exit
+			else
+				echo "freq_logger compiled!"
+			fi
+		fi
+	fi
 }
 
 # generate a JSON from the taskgen.py output
@@ -166,9 +183,11 @@ generate_tasksets_json(){
 # runs all tasksets with rt-app
 run_rtapp(){
 	mkdir $WORKDIR/logs
-	
+
 	echo "$1 governor: Running $(ls $WORKDIR/jsons/*.json | wc -l) rt-app tests:"
-	
+
+	./freq_logger "$BASEDIR/$1_freq.csv" &
+
 	for json in $WORKDIR/jsons/*.json
 	do
 		echo -n "."
@@ -179,6 +198,8 @@ run_rtapp(){
 		fi
 	done
 	echo "DONE!"
+
+	killall freq_logger
 }
 
 # count occurrences of negative slacks
@@ -244,11 +265,6 @@ test_governor(){
 ##################################################################################################
 ############ SCRIPT ENTRY POINT ##################################################################
 ##################################################################################################
-
-echo "governor.sh: Test governor performance."
-echo "Usage: sudo governor.sh [cores] [tasks] [tasksets] [util values]"
-echo "PARAMS: Cores: $CORES; Tasks: $TASKS; Tasksets: $TASKSETS; Utilization values: $UTIL_VALS"
-echo ""
 
 # 1) checks
 startup
