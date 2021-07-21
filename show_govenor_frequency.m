@@ -1,5 +1,5 @@
 %% Place here the input file in the "csv" format
-input = "userspace_freq2.csv";
+input = "example-governor_freq.csv";
 
 %% Read input data
 data = csvread(input);
