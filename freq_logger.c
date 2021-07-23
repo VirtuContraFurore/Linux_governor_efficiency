@@ -41,7 +41,7 @@ int main(int argc, char ** argv){
 		long time_s = spec.tv_sec;
 
 		fprintf(logfile, "%ld.%03ld, %i, %i\n", time_s, time_ns/1000/1000, scaling, cpuinfo);
-		fclose(logfile);
+		fclose(logfile); //TODO: change to fflush(...)
 
 		usleep(100*1000);
 	}
